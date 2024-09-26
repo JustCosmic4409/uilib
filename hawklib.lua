@@ -457,21 +457,29 @@ function HawkLib:Window(Win)
     
         ResizeMenu(Resizer, Main)
     
-        local sizeData = readfile("hawk_menu_size.json")
-
-        if not sizeData then
+        local sizeData
+        local filePath = "hawk_menu_size.json"
+        
+        local fileExists, errorMsg = pcall(function()
+            sizeData = readfile(filePath)
+        end)
+        
+        if not fileExists or not sizeData then
             local defaultSize = {
                 X = {Scale = Main.Size.X.Scale, Offset = Main.Size.X.Offset},
                 Y = {Scale = Main.Size.Y.Scale, Offset = Main.Size.Y.Offset}
             }
-            local sizeData = game:GetService("HttpService"):JSONEncode(defaultSize)
-            writefile("hawk_menu_size.json", sizeData) 
+            -- Encode default size to JSON format
+            sizeData = game:GetService("HttpService"):JSONEncode(defaultSize)
+            -- Write default size to the file
+            writefile(filePath, sizeData)
+        else
+            -- If the file exists, decode the existing data
+            sizeData = game:GetService("HttpService"):JSONDecode(sizeData)
+            -- Apply the size from the file
+            Main.Size = UDim2.new(sizeData.X.Scale, sizeData.X.Offset, sizeData.Y.Scale, sizeData.Y.Offset)
         end
-    
-        if sizeData then
-            local size = game:GetService("HttpService"):JSONDecode(sizeData)
-            Main.Size = UDim2.new(size.X.Scale, size.X.Offset, size.Y.Scale, size.Y.Offset)
-        end
+        
     
         local debounce = false
         local lastSize = Main.Size
