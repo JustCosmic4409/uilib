@@ -458,6 +458,16 @@ function HawkLib:Window(Win)
         ResizeMenu(Resizer, Main)
     
         local sizeData = readfile("hawk_menu_size.json")
+
+        if not sizeData then
+            local defaultSize = {
+                X = {Scale = Main.Size.X.Scale, Offset = Main.Size.X.Offset},
+                Y = {Scale = Main.Size.Y.Scale, Offset = Main.Size.Y.Offset}
+            }
+            local sizeData = game:GetService("HttpService"):JSONEncode(defaultSize)
+            writefile("hawk_menu_size.json", sizeData) 
+        end
+    
         if sizeData then
             local size = game:GetService("HttpService"):JSONDecode(sizeData)
             Main.Size = UDim2.new(size.X.Scale, size.X.Offset, size.Y.Scale, size.Y.Offset)
